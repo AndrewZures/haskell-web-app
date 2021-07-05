@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Models
       Web
   other-modules:
       Paths_heb
@@ -33,6 +34,12 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , esqueleto
+    , monad-logger
+    , mtl
+    , persistent
+    , persistent-postgresql
+    , persistent-template
     , scotty
   default-language: Haskell2010
 
@@ -46,8 +53,14 @@ executable heb-exe
   build-depends:
       base >=4.7 && <5
     , containers
+    , esqueleto
     , filepath
     , heb
+    , monad-logger
+    , mtl
+    , persistent
+    , persistent-postgresql
+    , persistent-template
     , scotty
     , text
   default-language: Haskell2010
@@ -62,6 +75,12 @@ test-suite heb-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , esqueleto
     , heb
+    , monad-logger
+    , mtl
+    , persistent
+    , persistent-postgresql
+    , persistent-template
     , scotty
   default-language: Haskell2010
