@@ -15,6 +15,8 @@
 
 module Model.Image where
 
+import Control.Monad.IO.Class (liftIO)
+import Data.Time
 import Database.Connection (runDBIO)
 import Database.Persist
   ( PersistStoreRead (get),
@@ -32,13 +34,17 @@ share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
 Image
-    name String
+    label String
+    detectionEnabled Bool default=True
+    createdAt UTCTime
+    updatedAt UTCTime
     deriving Show
     |]
 
-createImage :: String -> IO (Maybe Image)
-createImage name = runDBIO $ do
-  key <- insert $ Image name
+createImage :: String -> Bool -> IO (Maybe Image)
+createImage name detectionEnabled = runDBIO $ do
+  time <- liftIO getCurrentTime
+  key <- insert $ Image name detectionEnabled time time
   get key
 
 -- main :: IO ()

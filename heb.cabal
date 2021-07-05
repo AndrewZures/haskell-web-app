@@ -41,6 +41,7 @@ library
     , persistent-postgresql
     , persistent-template
     , scotty
+    , time
   default-language: Haskell2010
 
 executable heb-exe
@@ -63,6 +64,7 @@ executable heb-exe
     , persistent-template
     , scotty
     , text
+    , time
   default-language: Haskell2010
 
 test-suite heb-test
@@ -83,4 +85,5 @@ test-suite heb-test
     , persistent-postgresql
     , persistent-template
     , scotty
+    , time
   default-language: Haskell2010

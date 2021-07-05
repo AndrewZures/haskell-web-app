@@ -28,6 +28,7 @@ dependencies:
 - esqueleto
 - monad-logger
 - mtl
+- time
 
 library:
   source-dirs: src

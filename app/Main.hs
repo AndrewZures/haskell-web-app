@@ -13,7 +13,7 @@ main =
   scotty 3000 $
     get "/images" $ do
       name <- param "name"
-      maybeImage <- liftIO $ createImage name
+      maybeImage <- liftIO $ createImage name True
       case maybeImage of
         Nothing -> html "something went wrong"
-        Just (Image id) -> html $ mconcat ["<h1>Scotty, ", pack id, " me up!</h1>"]
+        Just (Image id _ _ _) -> html $ mconcat ["<h1>Scotty, ", pack id, " me up!</h1>"]
