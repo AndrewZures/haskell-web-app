@@ -13,13 +13,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Models where
+module Model.Image where
 
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Logger (LoggingT, runStdoutLoggingT)
-import Control.Monad.Reader (ReaderT)
+import Database.Connection (runDBIO)
 import Database.Persist
-import Database.Persist.Postgresql
+  ( PersistStoreRead (get),
+    PersistStoreWrite (insert),
+  )
 import Database.Persist.TH
   ( mkMigrate,
     mkPersist,
@@ -36,12 +36,9 @@ Image
     deriving Show
     |]
 
-runDBIO :: ReaderT SqlBackend (LoggingT IO) a -> IO a
-runDBIO = runStdoutLoggingT . withPostgresqlConn "dbname=heb" . runSqlConn
-
-create :: Image -> IO (Maybe Image)
-create image = runDBIO $ do
-  key <- insert image
+createImage :: String -> IO (Maybe Image)
+createImage name = runDBIO $ do
+  key <- insert $ Image name
   get key
 
 -- main :: IO ()
