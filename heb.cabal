@@ -27,7 +27,6 @@ library
   exposed-modules:
       Lib
       Models
-      Web
   other-modules:
       Paths_heb
   hs-source-dirs:

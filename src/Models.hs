@@ -39,5 +39,10 @@ Image
 runDBIO :: ReaderT SqlBackend (LoggingT IO) a -> IO a
 runDBIO = runStdoutLoggingT . withPostgresqlConn "dbname=heb" . runSqlConn
 
-main :: IO ()
-main = runDBIO $ runMigration migrateAll
+create :: Image -> IO (Maybe Image)
+create image = runDBIO $ do
+  key <- insert image
+  get key
+
+-- main :: IO ()
+-- main = runDBIO $ runMigration migrateAll
