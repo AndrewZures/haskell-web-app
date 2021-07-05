@@ -41,23 +41,27 @@ share
   [persistLowerCase|
 Image json
     label String
+    mime String
+    src String
     detectionEnabled Bool default=True
     createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
     updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
     |]
 
+data ImageData = ImageData {mime :: String, src :: String}
+  deriving (Show, Generic, ToJSON, FromJSON)
+
 data CreateImageParams = CreateImageParams
   { label :: String,
+    image :: ImageData,
     detectionEnabled :: Maybe Bool
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
 paramsToImage :: CreateImageParams -> Image
-paramsToImage (CreateImageParams label maybeDetectionEnabled) = do
-  Image label detectionEnabled Nothing Nothing
-  where
-    detectionEnabled = fromMaybe True maybeDetectionEnabled
+paramsToImage (CreateImageParams label img detectionEnabled) = do
+  Image label (mime img) (src img) (fromMaybe True detectionEnabled) Nothing Nothing
 
 createImage :: CreateImageParams -> IO (Maybe Image)
 createImage params = runDBIO $ do
