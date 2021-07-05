@@ -11,9 +11,9 @@ import Web.Scotty
 
 main =
   scotty 3000 $
-    get "/images" $ do
-      name <- param "name"
-      maybeImage <- liftIO $ createImage name True
+    post "/images" $ do
+      createImageParams <- jsonData :: ActionM CreateImageParams
+      maybeImage <- liftIO $ createImage createImageParams
       case maybeImage of
         Nothing -> html "something went wrong"
-        Just (Image id _ _ _) -> html $ mconcat ["<h1>Scotty, ", pack id, " me up!</h1>"]
+        Just image -> json image

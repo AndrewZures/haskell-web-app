@@ -1,4 +1,7 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -16,6 +19,8 @@
 module Model.Image where
 
 import Control.Monad.IO.Class (liftIO)
+import Data.Aeson
+import Data.Maybe
 import Data.Time
 import Database.Connection (runDBIO)
 import Database.Persist
@@ -29,22 +34,34 @@ import Database.Persist.TH
     share,
     sqlSettings,
   )
+import GHC.Generics
 
 share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
-Image
+Image json
     label String
     detectionEnabled Bool default=True
-    createdAt UTCTime
-    updatedAt UTCTime
+    createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
+    updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
     |]
 
-createImage :: String -> Bool -> IO (Maybe Image)
-createImage name detectionEnabled = runDBIO $ do
-  time <- liftIO getCurrentTime
-  key <- insert $ Image name detectionEnabled time time
+data CreateImageParams = CreateImageParams
+  { label :: String,
+    detectionEnabled :: Maybe Bool
+  }
+  deriving (Show, Generic, ToJSON, FromJSON)
+
+paramsToImage :: CreateImageParams -> Image
+paramsToImage (CreateImageParams label maybeDetectionEnabled) = do
+  Image label detectionEnabled Nothing Nothing
+  where
+    detectionEnabled = fromMaybe True maybeDetectionEnabled
+
+createImage :: CreateImageParams -> IO (Maybe Image)
+createImage params = runDBIO $ do
+  key <- insert $ paramsToImage params
   get key
 
 -- main :: IO ()
