@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- scotty
 
 library:
   source-dirs: src
@@ -35,6 +36,10 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - heb
+    - text
+    - filepath
+    - containers
+    - scotty
 
 tests:
   heb-test:
