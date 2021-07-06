@@ -17,7 +17,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
-module Model.Image (createImage, getImages, getImage, CreateImageParams) where
+module Model.Image (createImage, getImages, getImage, updateDetectedObjects, CreateImageParams) where
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
@@ -50,9 +50,13 @@ data CreateImageParams = CreateImageParams
   { label :: String,
     mime :: String,
     src :: String,
-    detectionEnabled :: Maybe Bool
+    detectionEnabled :: Maybe Bool,
+    detectedObjects :: [String]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
+
+updateDetectedObjects :: [String] -> CreateImageParams -> CreateImageParams
+updateDetectedObjects objects params = params {detectedObjects = objects}
 
 newUUID :: IO UUID
 newUUID = randomIO
@@ -72,27 +76,32 @@ Image json
     deriving Show
     |]
 
-getString :: [String]
-getString = ["hello"]
-
-paramsToImage :: CreateImageParams -> String -> Image
-paramsToImage (CreateImageParams label mime src detectionEnabled) uuidStr = do
-  let hi = JSONB getString :: JSONB [String]
-  Image uuidStr label mime src (fromMaybe True detectionEnabled) hi Nothing Nothing
+paramsToImage :: CreateImageParams -> UUID -> Image
+paramsToImage params uuid =
+  Image uuidStr label' mime' src' detectionEnabled' detectedObjects' Nothing Nothing
+  where
+    label' = label params
+    mime' = mime params
+    src' = src params
+    detectedObjects' = JSONB (detectedObjects params)
+    detectionEnabled' = Just False /= detectionEnabled params
+    uuidStr = toString uuid
 
 createImage :: CreateImageParams -> IO (Maybe Image)
 createImage params = runDBIO $ do
   uuid <- liftIO newUUID
-  key <- insert $ paramsToImage params (toString uuid)
+  key <- insert $ paramsToImage params uuid
   get key
 
 getImage :: String -> IO (Maybe (Entity Image))
-getImage imageUUID = runDBIO $ do
-  selectFirst [ImageUuid ==. imageUUID] []
+getImage imageUUID =
+  runDBIO $
+    selectFirst [ImageUuid ==. imageUUID] []
 
 getImages :: IO [Entity Image]
-getImages = runDBIO $ do
-  selectList [ImageLabel ==. "json-image2"] []
+getImages =
+  runDBIO $
+    selectList [ImageLabel ==. "json-image2"] []
 
 -- main :: IO ()
 -- main = runDBIO $ runMigration migrateAll

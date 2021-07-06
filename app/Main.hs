@@ -9,11 +9,15 @@ import Lib
 import Model.Image
 import Web.Scotty
 
+getString :: [String]
+getString = ["howdy", "hardy", "hola"]
+
 main =
   scotty 3000 $ do
     post "/images" $ do
       createImageParams <- jsonData :: ActionM CreateImageParams
-      maybeImage <- liftIO $ createImage createImageParams
+      let updatedImageParams = updateDetectedObjects getString createImageParams
+      maybeImage <- liftIO $ createImage updatedImageParams
       case maybeImage of
         Nothing -> html "something went wrong"
         Just image -> json image
