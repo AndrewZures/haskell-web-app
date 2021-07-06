@@ -1,29 +1,70 @@
+{-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Service.Image where
 
-import Control.Lens
-import Control.Monad.IO.Class (liftIO)
-import Data.ByteString
-import Data.Text
-import Data.Text.Encoding
-import Model.Image (Image (Image))
-import qualified Network.AWS.Rekognition.DetectLabels as R
-import qualified Network.AWS.Rekognition.Types as T
+import Data.Aeson
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as S8
+import qualified Data.Text as T
+import Data.Text.Encoding (encodeUtf8)
+import GHC.Base (Any)
+import GHC.Generics (Generic)
+import Model.Image (Image (..))
+import Network.HTTP.Simple
+
+packStr'' :: String -> B.ByteString
+packStr'' = encodeUtf8 . T.pack
 
 fetchAndAttachDetectedObjects :: Image -> IO Image
 fetchAndAttachDetectedObjects image = do
+  response <- fetchStuff (uri image)
   return image
 
--- toUTF8Bytes = Data.ByteString.unpack . encodeUtf8 . Data.Text.pack
+data ImagaTag = ImagaTag
+  { confidence :: Float,
+    tag :: String
+  }
+  deriving (Show, Generic, ToJSON, FromJSON)
 
--- fetchLabels :: Image -> T.Image
--- fetchLabels (Image _ _ _ src _ _ _ _) =
---   let img = toUTF8Bytes src :: T.Image
+newtype ImagaResults = ImagaResult
+  { tags :: [ImagaTag]
+  }
+  deriving (Show, Generic, ToJSON, FromJSON)
 
--- R.detectLabels rimage
+newtype ImagaTagResponse = ImagaTagResponse
+  { results :: ImagaResults
+  }
+  deriving (Show, Generic, ToJSON, FromJSON)
 
--- fetchImage
+fetchStuff :: String -> IO (Response ImagaTagResponse)
+fetchStuff uri = do
+  let request =
+        setRequestQueryString [("image_url", Just convertedUri)] $
+          setRequestHeader
+            "Content-Type"
+            ["application/json"]
+            $ setRequestHeader
+              "Authorization"
+              ["Basic YWNjX2UyNjFjNDRkZjM5YTkxZDpjNTg3Njg1OWExNmY3NTVlZmU3ZTlmNjAyNDI3NzkxNA=="]
+              "GET https://api.imagga.com/v2/tags"
+  response <- httpJSON request :: IO (Response ImagaTagResponse)
+  putStrLn $
+    "The status code was: "
+      ++ show (getResponseStatusCode response)
+  return response
+  where
+    convertedUri = packStr'' uri
 
--- fetchDetectedObjects :: Image -> IO [String]
+-- "GET https://api.imagga.com"
+-- response <- httpJSON request
+-- putStrLn $
+--   "The status code was: "
+--     ++ show (getResponseStatusCode response)
 
--- updateDetectedObjects :: Image -> [String] -> Image
--- updateDetectedObjects image newObjects = image {detectedObjects = JSONB newObjects}
+-- setRequestHeader "Authorization: Basic YWNjX2UyNjFjNDRkZjM5YTkxZDpjNTg3Njg1OWExNmY3NTVlZmU3ZTlmNjAyNDI3NzkxNA==" $
+--   "GET https://api.imagga.com"
+
+-- httpJSON request

@@ -37,6 +37,9 @@ dependencies:
 - text
 - bytestring
 - lens
+- hoauth2
+- uri-bytestring
+- http-client
 
 library:
   source-dirs: src

@@ -19,6 +19,7 @@
 
 module Model.Image where
 
+import Control.Lens
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Maybe
@@ -49,7 +50,7 @@ import System.Random
 data CreateImageParams = CreateImageParams
   { label :: String,
     mime :: String,
-    src :: String,
+    uri :: String,
     detectionEnabled :: Maybe Bool,
     detectedObjects :: [String]
   }
@@ -65,13 +66,15 @@ Image json
     uuid String
     label String
     mime String
-    src String
+    _uri String
     detectionEnabled Bool default=True
     detectedObjects (JSONB [String])
     createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
     updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
     |]
+
+makeLenses ''Image
 
 convertToImage :: CreateImageParams -> IO Image
 convertToImage params = do
@@ -80,12 +83,12 @@ convertToImage params = do
 
 paramsToImage :: CreateImageParams -> UUID -> Image
 paramsToImage params uuid =
-  Image uuid' label' mime' src' detectionEnabled' detectedObjects' Nothing Nothing
+  Image uuid' label' mime' uri' detectionEnabled' detectedObjects' Nothing Nothing
   where
     uuid' = toString uuid
     label' = label params
     mime' = mime params
-    src' = src params
+    uri' = uri params
     detectionEnabled' = Just False /= detectionEnabled params
     detectedObjects' = JSONB (detectedObjects params)
 
