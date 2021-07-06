@@ -25,6 +25,7 @@ import Data.Maybe
 import Data.Time
 import Data.UUID
 import Database.Connection (runDBIO)
+import Database.Esqueleto.PostgreSQL.JSON
 import Database.Persist
   ( Entity (Entity),
     PersistQueryRead (selectFirst),
@@ -34,6 +35,7 @@ import Database.Persist
     (==.),
     (>=.),
   )
+import Database.Persist.Postgresql.JSON
 import Database.Persist.TH
   ( mkMigrate,
     mkPersist,
@@ -43,6 +45,14 @@ import Database.Persist.TH
   )
 import GHC.Generics
 import System.Random
+
+data CreateImageParams = CreateImageParams
+  { label :: String,
+    mime :: String,
+    src :: String,
+    detectionEnabled :: Maybe Bool
+  }
+  deriving (Show, Generic, ToJSON, FromJSON)
 
 newUUID :: IO UUID
 newUUID = randomIO
@@ -56,22 +66,19 @@ Image json
     mime String
     src String
     detectionEnabled Bool default=True
+    detectedObjects (JSONB [String])
     createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
     updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
     |]
 
-data CreateImageParams = CreateImageParams
-  { label :: String,
-    mime :: String,
-    src :: String,
-    detectionEnabled :: Maybe Bool
-  }
-  deriving (Show, Generic, ToJSON, FromJSON)
+getString :: [String]
+getString = ["hello"]
 
 paramsToImage :: CreateImageParams -> String -> Image
-paramsToImage (CreateImageParams label mime src detectionEnabled) uuid = do
-  Image uuid label mime src (fromMaybe True detectionEnabled) Nothing Nothing
+paramsToImage (CreateImageParams label mime src detectionEnabled) uuidStr = do
+  let hi = JSONB getString :: JSONB [String]
+  Image uuidStr label mime src (fromMaybe True detectionEnabled) hi Nothing Nothing
 
 createImage :: CreateImageParams -> IO (Maybe Image)
 createImage params = runDBIO $ do
