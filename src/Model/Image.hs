@@ -17,15 +17,17 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
-module Model.Image (createImage, getImages, CreateImageParams) where
+module Model.Image (createImage, getImages, getImage, CreateImageParams) where
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Maybe
 import Data.Time
+import Data.UUID
 import Database.Connection (runDBIO)
 import Database.Persist
   ( Entity (Entity),
+    PersistQueryRead (selectFirst),
     PersistStoreRead (get),
     PersistStoreWrite (insert),
     selectList,
@@ -40,11 +42,16 @@ import Database.Persist.TH
     sqlSettings,
   )
 import GHC.Generics
+import System.Random
+
+newUUID :: IO UUID
+newUUID = randomIO
 
 share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
 Image json
+    uuid String
     label String
     mime String
     src String
@@ -62,14 +69,19 @@ data CreateImageParams = CreateImageParams
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-paramsToImage :: CreateImageParams -> Image
-paramsToImage (CreateImageParams label mime src detectionEnabled) = do
-  Image label mime src (fromMaybe True detectionEnabled) Nothing Nothing
+paramsToImage :: CreateImageParams -> String -> Image
+paramsToImage (CreateImageParams label mime src detectionEnabled) uuid = do
+  Image uuid label mime src (fromMaybe True detectionEnabled) Nothing Nothing
 
 createImage :: CreateImageParams -> IO (Maybe Image)
 createImage params = runDBIO $ do
-  key <- insert $ paramsToImage params
+  uuid <- liftIO newUUID
+  key <- insert $ paramsToImage params (toString uuid)
   get key
+
+getImage :: String -> IO (Maybe (Entity Image))
+getImage imageUUID = runDBIO $ do
+  selectFirst [ImageUuid ==. imageUUID] []
 
 getImages :: IO [Entity Image]
 getImages = runDBIO $ do

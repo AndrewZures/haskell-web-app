@@ -21,3 +21,10 @@ main =
     get "/images" $ do
       images <- liftIO getImages
       json images
+
+    get "/images/:uuid" $ do
+      imageUUID <- param "uuid"
+      maybeImage <- liftIO $ getImage imageUUID
+      case maybeImage of
+        Nothing -> html "something went wrong"
+        Just image -> json image
