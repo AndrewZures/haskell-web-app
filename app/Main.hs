@@ -7,7 +7,17 @@ import Data.Monoid (mconcat)
 import Data.Text.Lazy
 import Lib
 import Model.Image
+import Service.Image
 import Web.Scotty
+  ( ActionM,
+    get,
+    html,
+    json,
+    jsonData,
+    param,
+    post,
+    scotty,
+  )
 
 getString :: [String]
 getString = ["howdy", "hardy", "hola"]
@@ -16,9 +26,10 @@ main =
   scotty 3000 $ do
     post "/images" $ do
       createImageParams <- jsonData :: ActionM CreateImageParams
-      let updatedImageParams = updateDetectedObjects getString createImageParams
-      maybeImage <- liftIO $ createImage updatedImageParams
-      case maybeImage of
+      image <- liftIO $ convertToImage createImageParams
+      updatedImage <- liftIO $ fetchAndAttachDetectedObjects image
+      savedImage <- liftIO $ saveImage updatedImage
+      case savedImage of
         Nothing -> html "something went wrong"
         Just image -> json image
 

@@ -17,7 +17,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
-module Model.Image (createImage, getImages, getImage, updateDetectedObjects, CreateImageParams) where
+module Model.Image where
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
@@ -55,9 +55,6 @@ data CreateImageParams = CreateImageParams
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-updateDetectedObjects :: [String] -> CreateImageParams -> CreateImageParams
-updateDetectedObjects objects params = params {detectedObjects = objects}
-
 newUUID :: IO UUID
 newUUID = randomIO
 
@@ -76,19 +73,29 @@ Image json
     deriving Show
     |]
 
+convertToImage :: CreateImageParams -> IO Image
+convertToImage params = do
+  uuid <- liftIO newUUID
+  return $ paramsToImage params uuid
+
 paramsToImage :: CreateImageParams -> UUID -> Image
 paramsToImage params uuid =
-  Image uuidStr label' mime' src' detectionEnabled' detectedObjects' Nothing Nothing
+  Image uuid' label' mime' src' detectionEnabled' detectedObjects' Nothing Nothing
   where
+    uuid' = toString uuid
     label' = label params
     mime' = mime params
     src' = src params
-    detectedObjects' = JSONB (detectedObjects params)
     detectionEnabled' = Just False /= detectionEnabled params
-    uuidStr = toString uuid
+    detectedObjects' = JSONB (detectedObjects params)
 
-createImage :: CreateImageParams -> IO (Maybe Image)
-createImage params = runDBIO $ do
+saveImage :: Image -> IO (Maybe Image)
+saveImage image = runDBIO $ do
+  key <- insert image
+  get key
+
+createImageFromParams :: CreateImageParams -> IO (Maybe Image)
+createImageFromParams params = runDBIO $ do
   uuid <- liftIO newUUID
   key <- insert $ paramsToImage params uuid
   get key

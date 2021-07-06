@@ -28,6 +28,7 @@ library
       Database.Connection
       Lib
       Model.Image
+      Service.Image
   other-modules:
       Paths_heb
   hs-source-dirs:
@@ -36,6 +37,7 @@ library
       aeson
     , base >=4.7 && <5
     , esqueleto
+    , http-conduit
     , monad-logger
     , mtl
     , persistent
@@ -61,6 +63,7 @@ executable heb-exe
     , esqueleto
     , filepath
     , heb
+    , http-conduit
     , monad-logger
     , mtl
     , persistent
@@ -86,6 +89,7 @@ test-suite heb-test
     , base >=4.7 && <5
     , esqueleto
     , heb
+    , http-conduit
     , monad-logger
     , mtl
     , persistent
