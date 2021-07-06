@@ -33,6 +33,10 @@ dependencies:
 - uuid
 - random
 - http-conduit
+- amazonka-rekognition
+- text
+- bytestring
+- lens
 
 library:
   source-dirs: src
