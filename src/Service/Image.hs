@@ -2,12 +2,20 @@ module Service.Image where
 
 import Client.Imaga
 import Data.Text (Text)
-import Model.Image (CreateImageParams (detectedObjects, uri))
+import Model.Image
 
 fetchAndAttachDetectedObjects :: CreateImageParams -> IO CreateImageParams
-fetchAndAttachDetectedObjects params = do
-  detectedObjects <- fetchDetectObjects (uri params)
-  return params {detectedObjects = parseDetectedObjectNames detectedObjects}
+fetchAndAttachDetectedObjects params =
+  case detectionEnabled' of
+    Nothing -> return params
+    Just p -> if p then fetchAndAttachDetectedObjects' params else return params
+  where
+    detectionEnabled' = detectionEnabled params
+
+fetchAndAttachDetectedObjects' :: CreateImageParams -> IO CreateImageParams
+fetchAndAttachDetectedObjects' params = do
+  response <- fetchDetectObjects (uri params)
+  return params {detectedObjects = parseDetectedObjectNames response}
   where
     parseDetectedObjectNames objects = parseDetectedObjectsFromResponse objects
 
