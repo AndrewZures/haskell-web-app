@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
 module Main where
 
@@ -16,6 +17,7 @@ import Web.Scotty
     jsonData,
     param,
     post,
+    rescue,
     scotty,
   )
 
@@ -31,7 +33,8 @@ main =
         Just image -> json image
 
     get "/images" $ do
-      images <- liftIO getImages
+      name <- param "objects" `rescue` (\_ -> return $ pack "")
+      images <- liftIO $ getImages $ Prelude.map unpack $ splitOn (pack ",") name
       json images
 
     get "/images/:uuid" $ do
@@ -40,3 +43,6 @@ main =
       case maybeImage of
         Nothing -> html "something went wrong"
         Just image -> json image
+
+hello :: Text -> Text
+hello s = "hello " <> s

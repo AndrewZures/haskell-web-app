@@ -35,7 +35,6 @@ library
       src
   build-depends:
       aeson
-    , amazonka-rekognition
     , base >=4.7 && <5
     , bytestring
     , esqueleto
@@ -50,6 +49,7 @@ library
     , persistent-template
     , random
     , scotty
+    , split
     , text
     , time
     , uri-bytestring
@@ -65,7 +65,6 @@ executable heb-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
-    , amazonka-rekognition
     , base >=4.7 && <5
     , bytestring
     , containers
@@ -83,6 +82,7 @@ executable heb-exe
     , persistent-template
     , random
     , scotty
+    , split
     , text
     , time
     , uri-bytestring
@@ -99,7 +99,6 @@ test-suite heb-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
-    , amazonka-rekognition
     , base >=4.7 && <5
     , bytestring
     , esqueleto
@@ -115,6 +114,7 @@ test-suite heb-test
     , persistent-template
     , random
     , scotty
+    , split
     , text
     , time
     , uri-bytestring

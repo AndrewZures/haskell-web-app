@@ -96,19 +96,13 @@ saveImage image = runDBIO $ do
   key <- insert image
   get key
 
-createImageFromParams :: CreateImageParams -> IO (Maybe Image)
-createImageFromParams params = runDBIO $ do
-  uuid <- liftIO newUUID
-  key <- insert $ paramsToImage params uuid
-  get key
-
 getImage :: String -> IO (Maybe (Entity Image))
 getImage imageUUID =
   runDBIO $
     selectFirst [ImageUuid ==. imageUUID] []
 
-getImages :: IO [Entity Image]
-getImages =
+getImages :: [String] -> IO [Entity Image]
+getImages objects =
   runDBIO $
     selectList [ImageLabel ==. "json-image2"] []
 
