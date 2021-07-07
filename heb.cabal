@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Client.Imaga
       Database.Connection
       Lib
       Model.Image

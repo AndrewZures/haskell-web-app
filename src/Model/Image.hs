@@ -107,11 +107,7 @@ getImage imageUUID =
 
 getImages :: [Text] -> IO [Entity Image]
 getImages objects = do
-  let filter = filterObjs objects
-  runDBIO $ selectList [filter] []
-
-filterObjs :: [Text] -> Filter Image
-filterObjs objects r = view ImageDetectedObjects r ?&. objects
+  runDBIO $ selectList [] []
 
 -- main :: IO ()
 -- main = runDBIO $ runMigration migrateAll
