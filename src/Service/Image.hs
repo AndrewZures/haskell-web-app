@@ -6,11 +6,9 @@ import Model.Image
 
 fetchAndAttachDetectedObjects :: CreateImageParams -> IO CreateImageParams
 fetchAndAttachDetectedObjects params =
-  case detectionEnabled' of
-    Nothing -> return params
-    Just p -> if p then fetchAndAttachDetectedObjects' params else return params
+  if detectionEnabled' then fetchAndAttachDetectedObjects' params else return params
   where
-    detectionEnabled' = detectionEnabled params
+    detectionEnabled' = Just False /= detectionEnabled params
 
 fetchAndAttachDetectedObjects' :: CreateImageParams -> IO CreateImageParams
 fetchAndAttachDetectedObjects' params = do
@@ -19,9 +17,9 @@ fetchAndAttachDetectedObjects' params = do
   where
     parseDetectedObjectNames objects = parseDetectedObjectsFromResponse objects
 
-parseDetectedObjectsFromResponse :: ImagaTagResponse -> [Text]
+parseDetectedObjectsFromResponse :: ImagaTagResponse -> Maybe [Text]
 parseDetectedObjectsFromResponse response =
-  map tagStr itags
+  return $ map tagStr itags
   where
     iresults = result response
     itags = tags iresults

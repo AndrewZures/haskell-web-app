@@ -51,7 +51,7 @@ data CreateImageParams = CreateImageParams
     mime :: String,
     uri :: String,
     detectionEnabled :: Maybe Bool,
-    detectedObjects :: [Text]
+    detectedObjects :: Maybe [Text]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
@@ -84,7 +84,7 @@ paramsToImage params uuid =
     mime' = mime params
     uri' = uri params
     detectionEnabled' = Just False /= detectionEnabled params
-    detectedObjects' = detectedObjects params
+    detectedObjects' = fromMaybe [] (detectedObjects params)
 
 saveImage :: Image -> IO (Maybe Image)
 saveImage image = runDBIO $ do
