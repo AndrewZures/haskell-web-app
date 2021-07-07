@@ -30,6 +30,7 @@ library
       Lib
       Model.Image
       Service.Image
+      Util
   other-modules:
       Paths_heb
   hs-source-dirs:
@@ -42,7 +43,6 @@ library
     , hoauth2
     , http-client
     , http-conduit
-    , lens
     , monad-logger
     , mtl
     , persistent
@@ -75,7 +75,6 @@ executable heb-exe
     , hoauth2
     , http-client
     , http-conduit
-    , lens
     , monad-logger
     , mtl
     , persistent
@@ -107,7 +106,6 @@ test-suite heb-test
     , hoauth2
     , http-client
     , http-conduit
-    , lens
     , monad-logger
     , mtl
     , persistent

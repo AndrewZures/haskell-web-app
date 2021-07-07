@@ -35,7 +35,6 @@ dependencies:
 - http-conduit
 - text
 - bytestring
-- lens
 - hoauth2
 - uri-bytestring
 - http-client

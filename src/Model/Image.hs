@@ -15,11 +15,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
 module Model.Image where
 
-import Control.Lens
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Maybe
@@ -30,15 +28,11 @@ import Database.Connection (runDBIO)
 import Database.Esqueleto.PostgreSQL.JSON hiding ((?&.))
 import Database.Persist
   ( Entity (Entity),
-    Filter (Filter),
     PersistStoreRead (get),
     PersistStoreWrite (insert),
     selectFirst,
     selectList,
-    toPersistValueJSON,
-    (<-.),
     (==.),
-    (>=.),
   )
 import Database.Persist.Postgresql.JSON
 import Database.Persist.TH
@@ -50,6 +44,7 @@ import Database.Persist.TH
   )
 import GHC.Generics
 import System.Random
+import Util (newUUID)
 
 data CreateImageParams = CreateImageParams
   { label :: String,
@@ -59,9 +54,6 @@ data CreateImageParams = CreateImageParams
     detectedObjects :: [Text]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
-
-newUUID :: IO UUID
-newUUID = randomIO
 
 share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
@@ -77,7 +69,6 @@ Image json
     updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
     |]
-makeLenses ''Image
 
 convertToImage :: CreateImageParams -> IO Image
 convertToImage params = do
