@@ -47,7 +47,7 @@ import System.Random
 import Util (newUUID)
 
 data CreateImageParams = CreateImageParams
-  { label :: String,
+  { label :: Maybe String,
     mime :: String,
     uri :: String,
     detectionEnabled :: Maybe Bool,
@@ -80,7 +80,7 @@ paramsToImage params uuid =
   Image uuid' label' mime' uri' detectionEnabled' detectedObjects' Nothing Nothing
   where
     uuid' = toString uuid
-    label' = label params
+    label' = fromMaybe uuid' (label params)
     mime' = mime params
     uri' = uri params
     detectionEnabled' = Just False /= detectionEnabled params
