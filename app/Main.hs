@@ -19,9 +19,6 @@ import Web.Scotty
     scotty,
   )
 
-getString :: [String]
-getString = ["howdy", "hardy", "hola"]
-
 main =
   scotty 3000 $ do
     post "/images" $ do

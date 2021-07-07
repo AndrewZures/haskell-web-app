@@ -17,16 +17,16 @@ import GHC.Generics (Generic)
 import Model.Image
 import Network.HTTP.Simple
 
-data Another = Another
+newtype ImagaTagDetails = ImagaTagDetails
   { en :: String
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-makeLenses ''Another
+makeLenses ''ImagaTagDetails
 
 data ImagaTag = ImagaTag
   { confidence :: Float,
-    tag :: Another
+    tag :: ImagaTagDetails
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
@@ -51,23 +51,21 @@ packStr'' = encodeUtf8 . T.pack
 
 fetchAndAttachDetectedObjects :: CreateImageParams -> IO CreateImageParams
 fetchAndAttachDetectedObjects params = do
-  response <- fetchStuff (uri params)
-  let detectedObjs = detectedObjects response
-  putStrLn $ "detected objects: " ++ show detectedObjs
-  return params {detectedObjects = detectedObjs}
+  response <- fetchDetectObjects (uri params)
+  return params {detectedObjects = detectedObjects response}
   where
-    detectedObjects response = detectedObjectsFromResponse $ getResponseBody response
+    detectedObjects response = parseDetectedObjectsFromResponse $ getResponseBody response
 
-detectedObjectsFromResponse :: ImagaTagResponse -> [String]
-detectedObjectsFromResponse response =
-  map tagEn tagsF
+parseDetectedObjectsFromResponse :: ImagaTagResponse -> [String]
+parseDetectedObjectsFromResponse response =
+  map tagStr itags
   where
-    resultsF = result response
-    tagsF = tags resultsF
-    tagEn itag = en $ tag itag
+    iresults = result response
+    itags = tags iresults
+    tagStr itag = en $ tag itag
 
-fetchStuff :: String -> IO (Response ImagaTagResponse)
-fetchStuff uri = do
+fetchDetectObjects :: String -> IO (Response ImagaTagResponse)
+fetchDetectObjects uri = do
   let request =
         setRequestQueryString [("image_url", Just convertedUri)] $
           setRequestHeader
@@ -77,24 +75,6 @@ fetchStuff uri = do
               "Authorization"
               ["Basic YWNjX2UyNjFjNDRkZjM5YTkxZDpjNTg3Njg1OWExNmY3NTVlZmU3ZTlmNjAyNDI3NzkxNA=="]
               "GET https://api.imagga.com/v2/tags"
-  response <- httpJSON request :: IO (Response ImagaTagResponse)
-  putStrLn $
-    "The status code was: "
-      ++ show (getResponseStatusCode response)
-  putStrLn $
-    "The body was: "
-      ++ show (getResponseBody response)
-  return response
+  httpJSON request :: IO (Response ImagaTagResponse)
   where
     convertedUri = packStr'' uri
-
--- "GET https://api.imagga.com"
--- response <- httpJSON request
--- putStrLn $
---   "The status code was: "
---     ++ show (getResponseStatusCode response)
-
--- setRequestHeader "Authorization: Basic YWNjX2UyNjFjNDRkZjM5YTkxZDpjNTg3Njg1OWExNmY3NTVlZmU3ZTlmNjAyNDI3NzkxNA==" $
---   "GET https://api.imagga.com"
-
--- httpJSON request
