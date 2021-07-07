@@ -4,10 +4,9 @@ module Main where
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Monoid (mconcat)
-import Data.Text.Lazy
-import Lib
-import Model.Image
-import Service.Image
+import Data.Text.Lazy (pack, splitOn, toStrict)
+import Model.Image (CreateImageParams, convertToImage, getImage, getImages, saveImage)
+import Service.Image (fetchAndAttachDetectedObjects)
 import Web.Scotty
   ( ActionM,
     get,
@@ -33,7 +32,7 @@ main =
 
     get "/images" $ do
       name <- param "objects" `rescue` (\_ -> return $ pack "")
-      images <- liftIO $ getImages $ Prelude.map toStrict $ splitOn (pack ",") name
+      images <- liftIO $ getImages $ map toStrict $ splitOn (pack ",") name
       json images
 
     get "/images/:uuid" $ do
