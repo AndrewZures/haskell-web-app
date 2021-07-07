@@ -66,14 +66,13 @@ Image json
     uuid String
     label String
     mime String
-    _uri String
+    uri String
     detectionEnabled Bool default=True
     detectedObjects (JSONB [String])
     createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
     updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
     |]
-
 makeLenses ''Image
 
 convertToImage :: CreateImageParams -> IO Image

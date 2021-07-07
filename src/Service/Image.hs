@@ -2,9 +2,11 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Service.Image where
 
+import Control.Lens
 import Data.Aeson
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as S8
@@ -12,32 +14,57 @@ import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import GHC.Base (Any)
 import GHC.Generics (Generic)
-import Model.Image (Image (..))
+import Model.Image
 import Network.HTTP.Simple
 
-packStr'' :: String -> B.ByteString
-packStr'' = encodeUtf8 . T.pack
+data Another = Another
+  { en :: String
+  }
+  deriving (Show, Generic, ToJSON, FromJSON)
 
-fetchAndAttachDetectedObjects :: Image -> IO Image
-fetchAndAttachDetectedObjects image = do
-  response <- fetchStuff (uri image)
-  return image
+makeLenses ''Another
 
 data ImagaTag = ImagaTag
   { confidence :: Float,
-    tag :: String
+    tag :: Another
   }
   deriving (Show, Generic, ToJSON, FromJSON)
+
+makeLenses ''ImagaTag
 
 newtype ImagaResults = ImagaResult
   { tags :: [ImagaTag]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
+makeLenses ''ImagaResults
+
 newtype ImagaTagResponse = ImagaTagResponse
-  { results :: ImagaResults
+  { result :: ImagaResults
   }
   deriving (Show, Generic, ToJSON, FromJSON)
+
+makeLenses ''ImagaTagResponse
+
+packStr'' :: String -> B.ByteString
+packStr'' = encodeUtf8 . T.pack
+
+fetchAndAttachDetectedObjects :: CreateImageParams -> IO CreateImageParams
+fetchAndAttachDetectedObjects params = do
+  response <- fetchStuff (uri params)
+  let detectedObjs = detectedObjects response
+  putStrLn $ "detected objects: " ++ show detectedObjs
+  return params {detectedObjects = detectedObjs}
+  where
+    detectedObjects response = detectedObjectsFromResponse $ getResponseBody response
+
+detectedObjectsFromResponse :: ImagaTagResponse -> [String]
+detectedObjectsFromResponse response =
+  map tagEn tagsF
+  where
+    resultsF = result response
+    tagsF = tags resultsF
+    tagEn itag = en $ tag itag
 
 fetchStuff :: String -> IO (Response ImagaTagResponse)
 fetchStuff uri = do
@@ -54,6 +81,9 @@ fetchStuff uri = do
   putStrLn $
     "The status code was: "
       ++ show (getResponseStatusCode response)
+  putStrLn $
+    "The body was: "
+      ++ show (getResponseBody response)
   return response
   where
     convertedUri = packStr'' uri

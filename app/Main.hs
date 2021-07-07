@@ -26,9 +26,9 @@ main =
   scotty 3000 $ do
     post "/images" $ do
       createImageParams <- jsonData :: ActionM CreateImageParams
-      image <- liftIO $ convertToImage createImageParams
-      updatedImage <- liftIO $ fetchAndAttachDetectedObjects image
-      savedImage <- liftIO $ saveImage updatedImage
+      updatedParams <- liftIO $ fetchAndAttachDetectedObjects createImageParams
+      image <- liftIO $ convertToImage updatedParams
+      savedImage <- liftIO $ saveImage image
       case savedImage of
         Nothing -> html "something went wrong"
         Just image -> json image
