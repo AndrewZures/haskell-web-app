@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
 module Main where
 
@@ -34,7 +33,7 @@ main =
 
     get "/images" $ do
       name <- param "objects" `rescue` (\_ -> return $ pack "")
-      images <- liftIO $ getImages $ Prelude.map unpack $ splitOn (pack ",") name
+      images <- liftIO $ getImages $ Prelude.map toStrict $ splitOn (pack ",") name
       json images
 
     get "/images/:uuid" $ do
@@ -43,6 +42,3 @@ main =
       case maybeImage of
         Nothing -> html "something went wrong"
         Just image -> json image
-
-hello :: Text -> Text
-hello s = "hello " <> s

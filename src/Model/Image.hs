@@ -23,16 +23,20 @@ import Control.Lens
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Maybe
+import Data.Text.Internal
 import Data.Time
 import Data.UUID
 import Database.Connection (runDBIO)
-import Database.Esqueleto.PostgreSQL.JSON
+import Database.Esqueleto.PostgreSQL.JSON hiding ((?&.))
 import Database.Persist
   ( Entity (Entity),
-    PersistQueryRead (selectFirst),
+    Filter (Filter),
     PersistStoreRead (get),
     PersistStoreWrite (insert),
+    selectFirst,
     selectList,
+    toPersistValueJSON,
+    (<-.),
     (==.),
     (>=.),
   )
@@ -52,7 +56,7 @@ data CreateImageParams = CreateImageParams
     mime :: String,
     uri :: String,
     detectionEnabled :: Maybe Bool,
-    detectedObjects :: [String]
+    detectedObjects :: [Text]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
@@ -68,7 +72,7 @@ Image json
     mime String
     uri String
     detectionEnabled Bool default=True
-    detectedObjects (JSONB [String])
+    detectedObjects [Text] sqltype=jsonb
     createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
     updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
     deriving Show
@@ -89,7 +93,7 @@ paramsToImage params uuid =
     mime' = mime params
     uri' = uri params
     detectionEnabled' = Just False /= detectionEnabled params
-    detectedObjects' = JSONB (detectedObjects params)
+    detectedObjects' = detectedObjects params
 
 saveImage :: Image -> IO (Maybe Image)
 saveImage image = runDBIO $ do
@@ -101,10 +105,13 @@ getImage imageUUID =
   runDBIO $
     selectFirst [ImageUuid ==. imageUUID] []
 
-getImages :: [String] -> IO [Entity Image]
-getImages objects =
-  runDBIO $
-    selectList [ImageLabel ==. "json-image2"] []
+getImages :: [Text] -> IO [Entity Image]
+getImages objects = do
+  let filter = filterObjs objects
+  runDBIO $ selectList [filter] []
+
+filterObjs :: [Text] -> Filter Image
+filterObjs objects r = view ImageDetectedObjects r ?&. objects
 
 -- main :: IO ()
 -- main = runDBIO $ runMigration migrateAll

@@ -18,7 +18,7 @@ import Model.Image
 import Network.HTTP.Simple
 
 newtype ImagaTagDetails = ImagaTagDetails
-  { en :: String
+  { en :: T.Text
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
@@ -56,7 +56,7 @@ fetchAndAttachDetectedObjects params = do
   where
     detectedObjects response = parseDetectedObjectsFromResponse $ getResponseBody response
 
-parseDetectedObjectsFromResponse :: ImagaTagResponse -> [String]
+parseDetectedObjectsFromResponse :: ImagaTagResponse -> [T.Text]
 parseDetectedObjectsFromResponse response =
   map tagStr itags
   where
