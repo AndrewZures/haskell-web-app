@@ -63,19 +63,20 @@ Image json
     uri String
     detectionEnabled Bool default=True
     detectedObjects [Text] sqltype=jsonb
-    createdAt UTCTime Maybe default=CURRENT_TIMESTAMP
-    updatedAt UTCTime Maybe default=CURRENT_TIMESTAMP
+    createdAt UTCTime
+    updatedAt UTCTime
     deriving Show
     |]
 
 convertToImage :: CreateImageParams -> IO Image
 convertToImage params = do
   uuid <- liftIO newUUID
-  return $ paramsToImage params uuid
+  paramsToImage params uuid
 
-paramsToImage :: CreateImageParams -> UUID -> Image
-paramsToImage params uuid =
-  Image uuid' label' uri' detectionEnabled' detectedObjects' Nothing Nothing
+paramsToImage :: CreateImageParams -> UUID -> IO Image
+paramsToImage params uuid = do
+  time <- getCurrentTime
+  return $ Image uuid' label' uri' detectionEnabled' detectedObjects' time time
   where
     uuid' = toString uuid
     label' = fromMaybe uuid' (label params)

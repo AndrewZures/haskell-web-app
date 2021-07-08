@@ -1,6 +1,7 @@
 module Service.Image where
 
 import Client.Imagga
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Model.Image
 
@@ -8,7 +9,7 @@ fetchAndAttachDetectedObjects :: CreateImageParams -> IO CreateImageParams
 fetchAndAttachDetectedObjects params =
   if detectionEnabled' then fetchAndAttachDetectedObjects' params else return params
   where
-    detectionEnabled' = Just False /= detectionEnabled params
+    detectionEnabled' = fromMaybe False (detectionEnabled params)
 
 fetchAndAttachDetectedObjects' :: CreateImageParams -> IO CreateImageParams
 fetchAndAttachDetectedObjects' params = do

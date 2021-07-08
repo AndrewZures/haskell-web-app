@@ -1,5 +1,3 @@
-# HEB
-
 ### To Run
 
 - Create database
