@@ -15,11 +15,9 @@ fetchAndAttachDetectedObjects' :: CreateImageParams -> IO CreateImageParams
 fetchAndAttachDetectedObjects' params = do
   response <- fetchDetectObjects (uri params)
   return params {detectedObjects = parseDetectedObjectNames response}
-  where
-    parseDetectedObjectNames objects = parseDetectedObjectsFromResponse objects
 
-parseDetectedObjectsFromResponse :: ImaggaTagResponse -> Maybe [Text]
-parseDetectedObjectsFromResponse response =
+parseDetectedObjectNames :: ImaggaTagsResponse -> Maybe [Text]
+parseDetectedObjectNames response =
   return $ map tagStr itags
   where
     iresults = result response

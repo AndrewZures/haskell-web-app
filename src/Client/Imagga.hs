@@ -23,19 +23,19 @@ newtype ImaggaTagDetails = ImaggaTagDetails
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-data ImaggaTag = ImaggaTag
+data ImaggaTagData = ImaggaTagData
   { confidence :: Float,
     tag :: ImaggaTagDetails
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-newtype ImaggaResults = ImaggaResult
-  { tags :: [ImaggaTag]
+newtype ImaggaInternalResults = ImaggaResult
+  { tags :: [ImaggaTagData]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-newtype ImaggaTagResponse = ImaggaTagResponse
-  { result :: ImaggaResults
+newtype ImaggaTagsResponse = ImaggaTagsResponse
+  { result :: ImaggaInternalResults
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
@@ -46,14 +46,14 @@ setAuthorizationHeader =
     "Authorization"
     ["Basic <token>"]
 
-fetchDetectObjects :: String -> IO ImaggaTagResponse
+fetchDetectObjects :: String -> IO ImaggaTagsResponse
 fetchDetectObjects uri = do
   let request =
         setRequestQueryString [("image_url", Just convertedUri)] $
           setContentTypeJSON $
             setAuthorizationHeader
               "GET https://api.imagga.com/v2/tags"
-  response <- httpJSON request :: IO (Response ImaggaTagResponse)
+  response <- httpJSON request :: IO (Response ImaggaTagsResponse)
   return $ getResponseBody response
   where
     convertedUri = stringToBytestring uri
