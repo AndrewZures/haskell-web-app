@@ -38,6 +38,7 @@ dependencies:
 - hoauth2
 - uri-bytestring
 - http-client
+- http-types
 - split
 
 library:

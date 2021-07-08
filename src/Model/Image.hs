@@ -98,6 +98,7 @@ getImage imageUUID =
 
 getImages :: [Text] -> IO [Entity Image]
 getImages objects = do
+  -- convert objects list into jsonb query
   runDBIO $ selectList [] []
 
 -- main :: IO ()
