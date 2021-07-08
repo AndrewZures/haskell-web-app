@@ -61,7 +61,6 @@ share
 Image json
     uuid String
     label String
-    mime String
     uri String
     detectionEnabled Bool default=True
     detectedObjects [Text] sqltype=jsonb
@@ -77,11 +76,10 @@ convertToImage params = do
 
 paramsToImage :: CreateImageParams -> UUID -> Image
 paramsToImage params uuid =
-  Image uuid' label' mime' uri' detectionEnabled' detectedObjects' Nothing Nothing
+  Image uuid' label' uri' detectionEnabled' detectedObjects' Nothing Nothing
   where
     uuid' = toString uuid
     label' = fromMaybe uuid' (label params)
-    mime' = mime params
     uri' = uri params
     detectionEnabled' = Just False /= detectionEnabled params
     detectedObjects' = fromMaybe [] (detectedObjects params)
@@ -100,6 +98,3 @@ getImages :: [Text] -> IO [Entity Image]
 getImages objects = do
   -- convert objects list into jsonb query
   runDBIO $ selectList [] []
-
--- main :: IO ()
--- main = runDBIO $ runMigration migrateAll
