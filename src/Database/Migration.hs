@@ -5,6 +5,6 @@ import Database.Persist.Postgresql (runMigration)
 import Model.Image (migrateAll)
 
 -- Note: Code below will need to be uncommented to run migrations.
---       Then run `stack runghc -- src/Script/Migration.hs`.
+--       Then run `stack runghc -- src/Database/Migration.hs`.
 -- main :: IO ()
 -- main = runDBIO $ runMigration migrateAll

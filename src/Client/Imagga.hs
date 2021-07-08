@@ -44,7 +44,7 @@ setContentTypeJSON = setRequestHeader "Content-Type" ["application/json"]
 setAuthorizationHeader =
   setRequestHeader
     "Authorization"
-    ["Basic <token>"]
+    ["Basic YWNjX2UyNjFjNDRkZjM5YTkxZDpjNTg3Njg1OWExNmY3NTVlZmU3ZTlmNjAyNDI3NzkxNA=="]
 
 fetchDetectObjects :: String -> IO ImaggaTagsResponse
 fetchDetectObjects uri = do
