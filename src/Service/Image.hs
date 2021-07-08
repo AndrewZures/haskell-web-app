@@ -18,7 +18,7 @@ fetchAndAttachDetectedObjects' params = do
   where
     parseDetectedObjectNames objects = parseDetectedObjectsFromResponse objects
 
-parseDetectedObjectsFromResponse :: ImagaTagResponse -> Maybe [Text]
+parseDetectedObjectsFromResponse :: ImaggaTagResponse -> Maybe [Text]
 parseDetectedObjectsFromResponse response =
   return $ map tagStr itags
   where

@@ -18,24 +18,24 @@ import Network.HTTP.Simple
   )
 import Util (stringToBytestring)
 
-newtype ImagaTagDetails = ImagaTagDetails
+newtype ImaggaTagDetails = ImaggaTagDetails
   { en :: Text
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-data ImagaTag = ImagaTag
+data ImaggaTag = ImaggaTag
   { confidence :: Float,
-    tag :: ImagaTagDetails
+    tag :: ImaggaTagDetails
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-newtype ImagaResults = ImagaResult
-  { tags :: [ImagaTag]
+newtype ImaggaResults = ImaggaResult
+  { tags :: [ImaggaTag]
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
-newtype ImagaTagResponse = ImagaTagResponse
-  { result :: ImagaResults
+newtype ImaggaTagResponse = ImaggaTagResponse
+  { result :: ImaggaResults
   }
   deriving (Show, Generic, ToJSON, FromJSON)
 
@@ -46,14 +46,14 @@ setAuthorizationHeader =
     "Authorization"
     ["Basic YWNjX2UyNjFjNDRkZjM5YTkxZDpjNTg3Njg1OWExNmY3NTVlZmU3ZTlmNjAyNDI3NzkxNA=="]
 
-fetchDetectObjects :: String -> IO ImagaTagResponse
+fetchDetectObjects :: String -> IO ImaggaTagResponse
 fetchDetectObjects uri = do
   let request =
         setRequestQueryString [("image_url", Just convertedUri)] $
           setContentTypeJSON $
             setAuthorizationHeader
               "GET https://api.imagga.com/v2/tags"
-  response <- httpJSON request :: IO (Response ImagaTagResponse)
+  response <- httpJSON request :: IO (Response ImaggaTagResponse)
   return $ getResponseBody response
   where
     convertedUri = stringToBytestring uri
