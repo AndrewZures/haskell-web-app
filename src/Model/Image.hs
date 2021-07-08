@@ -48,7 +48,6 @@ import Util (newUUID)
 
 data CreateImageParams = CreateImageParams
   { label :: Maybe String,
-    mime :: String,
     uri :: String,
     detectionEnabled :: Maybe Bool,
     detectedObjects :: Maybe [Text]
@@ -96,5 +95,5 @@ getImage imageUUID =
 
 getImages :: [Text] -> IO [Entity Image]
 getImages objects = do
-  -- convert objects list into jsonb query
+  -- TODO: convert objects list into jsonb query
   runDBIO $ selectList [] []

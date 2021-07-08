@@ -1,4 +1,4 @@
-module Script.Migration where
+module Database.Migration where
 
 import Database.Connection (runDBIO)
 import Database.Persist.Postgresql (runMigration)

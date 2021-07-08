@@ -25,10 +25,10 @@ source-repository head
 
 library
   exposed-modules:
-      Client.Imaga
+      Client.Imagga
       Database.Connection
+      Database.Migration
       Model.Image
-      Script.Migration
       Service.Image
       Util
   other-modules:

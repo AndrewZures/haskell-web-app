@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Client.Imaga where
+module Client.Imagga where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.ByteString (ByteString)

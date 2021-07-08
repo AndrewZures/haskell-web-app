@@ -1,6 +1,6 @@
 module Service.Image where
 
-import Client.Imaga
+import Client.Imagga
 import Data.Text (Text)
 import Model.Image
 
